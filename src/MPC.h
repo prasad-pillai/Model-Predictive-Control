@@ -7,9 +7,9 @@
 using namespace std;
 
 // setting reference values
-#define REFERENCE_VELOCITY 40
-#define REFERENCE_EPSI 0
-#define REFERENCE_CTE 0
+#define REFERENCE_VELOCITY 40.0
+#define REFERENCE_EPSI 0.0
+#define REFERENCE_CTE 0.0
 
 //Weights for the cost function
 #define W_CTE 1.0

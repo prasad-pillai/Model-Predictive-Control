@@ -6,7 +6,7 @@
 using CppAD::AD;
 
 // TODO: Set the timestep length and duration
-size_t N = 15;
+size_t N = 15.0;
 double dt = 0.1;
 
 // This value assumes the model presented in the classroom is used.
@@ -276,7 +276,7 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
 	this->res_x = {};
 	this->res_y = {};
 
-	for (uint8_t i = 0; i < N; i++) {
+	for (uint8_t i = 0; i < N-1; i++) {
 		this->res_x.push_back(solution.x[start_x + i]);
 		this->res_y.push_back(solution.x[start_y + i]);
 	}
