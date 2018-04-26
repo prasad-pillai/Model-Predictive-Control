@@ -6,8 +6,8 @@
 using CppAD::AD;
 
 // TODO: Set the timestep length and duration
-size_t N = 15.0;
-double dt = 0.1;
+size_t N = 10;
+double dt = 0.15;
 
 // This value assumes the model presented in the classroom is used.
 //
@@ -70,16 +70,16 @@ public:
 		// Minimize the value gap between sequential actuations
 		// Add Scaling factor for smoothing the results
 		for (uint8_t t = 0; t < N - 2; t++) {
-			fg[0] += W_DELTA_DOT * CppAD::pow(
+			fg[0] += W_DELTA_DIFF * CppAD::pow(
 					vars[start_delta + t + 1] - vars[start_delta + t], 2);
-			fg[0] += W_ACC_DOT * CppAD::pow(
+			fg[0] += W_ACC_DIFF * CppAD::pow(
 					vars[start_acc + t + 1] - vars[start_acc + t], 2);
 		}
 
 		//-----Setting up constrains
 		// Initial Constraints
 
-		// as fg[0] is used for cost value, we use 1
+		// as fg[0] is used for cost value
 		fg[1 + start_x] = vars[start_x];
 		fg[1 + start_y] = vars[start_y];
 		fg[1 + start_psi] = vars[start_psi];
@@ -105,7 +105,7 @@ public:
 			AD<double> cte0 = vars[start_cte + t - 1];
 			AD<double> epsi0 = vars[start_epsi + t - 1];
 
-			// at t, considering the actuations****************
+			// at t, considering the actuations
 			AD<double> delta0 = vars[start_delta + t - 1];
 			AD<double> a0 = vars[start_acc + t - 1];
 
@@ -154,7 +154,7 @@ MPC::~MPC() {
 
 vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
 	bool ok = true;
-	size_t i;
+//	size_t i;
 	typedef CPPAD_TESTVECTOR(double) Dvector;
 
 	// TODO: Set the number of model variables (includes both states and inputs).

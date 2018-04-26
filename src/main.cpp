@@ -109,47 +109,46 @@ int main() {
 							double delta = j[1]["steering_angle"];
 							double acceleration = j[1]["throttle"];
 
-							// transform data to the cars coordinate system
-							Eigen::VectorXd ptsx_vehicle = Eigen::VectorXd::Map(ptsx.data(), ptsx.size());
-							Eigen::VectorXd ptsy_vehicle = Eigen::VectorXd::Map(ptsy.data(), ptsy.size());
+							// transform data from world to the cars coordinate system
+							Eigen::VectorXd ptsx_car = Eigen::VectorXd::Map(ptsx.data(), ptsx.size());
+							Eigen::VectorXd ptsy_car = Eigen::VectorXd::Map(ptsy.data(), ptsy.size());
 
-							for(int i = 0; i < ptsx_vehicle.size(); i++) {
-								double x = ptsx_vehicle[i] - px;
-								double y = ptsy_vehicle[i] - py;
-								ptsx_vehicle[i] = x * cos(psi) + y * sin(psi);
-								ptsy_vehicle[i] = - x * sin(psi) + y * cos(psi);
+							for(int i = 0; i < ptsx_car.size(); i++) {
+								double x = ptsx_car[i] - px;
+								double y = ptsy_car[i] - py;
+
+								ptsx_car[i] = x * cos(psi) + y * sin(psi);
+								ptsy_car[i] = - x * sin(psi) + y * cos(psi);
 							}
 
 							// fitting waypoints to 3rd order polynomial
-							auto coefficients = polyfit(ptsx_vehicle, ptsy_vehicle, 3);
+							auto coefficients = polyfit(ptsx_car, ptsy_car, 3);
 
-							// get CTE (at x=0)
+							// calculate CTE (at x=0)
 							double cte = polyeval(coefficients, 0);
 
-							// Orientation error, -atan(b1 + b2*x, b3* x^2) (as car is at x=0)
+							// calculate orientation error at x=0, -atan(b1 + b2*x, b3* x^2)
 							double epsi = -atan(coefficients[1]);
 
-							// to account for the latency (100ms predict the state of the car after this)
+							// account for the latency of 100ms
 							double latency = 100.0/1000.0;
 
-							double px_act = v * latency;
-							double py_act = 0;
-							double psi_act = - v * delta * latency / 2.67;
-							double v_act = v + acceleration * latency;
-							double cte_act = cte + v * sin(epsi) * latency;
-							double epsi_act = epsi + psi_act;
+							double px_actual = v * latency;
+							double py_actual = 0;
+							double psi_actual = - v * delta * latency / 2.67;
+							double v_actual = v + acceleration * latency;
+							double cte_actual = cte + v * sin(epsi) * latency;
+							double epsi_actual = epsi + psi_actual;
 
 							// state vector
 							Eigen::VectorXd state(6);
-							state << px_act, py_act, psi_act, v_act, cte_act, epsi_act;
+							state << px_actual, py_actual, psi_actual, v_actual, cte_actual, epsi_actual;
 
 							// solve the trajectory
-							auto solution = mpc.Solve(state, coefficients);
+							auto result = mpc.Solve(state, coefficients);
 							// get the steering and throttle values
-							steer_value = -solution[0]/ deg2rad(25);
-							throttle_value = solution[1];
-							auto N = solution[2];
-
+							steer_value = -result[0]/ deg2rad(25);
+							throttle_value = result[1];
 
 
 							json msgJson;
@@ -164,13 +163,8 @@ int main() {
 
 							//.. add (x,y) points to list here, points are in reference to the vehicle's coordinate system
 							// the points in the simulator are connected by a Green line
-
-//							for(int i = 0; i < N-1; i++) {
-//							            mpc_x_vals.push_back(solution[i+3]);
-//							            mpc_y_vals.push_back(solution[N + i+3]);
-//							}
-
 							//MPC displayed from the result of the solver
+
 							mpc_x_vals  = mpc.res_x;
 							mpc_y_vals = mpc.res_y;
 
@@ -179,16 +173,16 @@ int main() {
 							msgJson["mpc_y"] = mpc_y_vals;
 
 							//Display the waypoints/reference line
-							vector<double> next_x_vals(ptsx_vehicle.size());
-							vector<double> next_y_vals(ptsx_vehicle.size());
+							vector<double> next_x_vals(ptsx_car.size());
+							vector<double> next_y_vals(ptsx_car.size());
 
 							//.. add (x,y) points to list here, points are in reference to the vehicle's coordinate system
 							// the points in the simulator are connected by a Yellow line
 
 
-							for(int i = 0; i < ptsx_vehicle.size(); i++) {
-							            next_x_vals[i] = ptsx_vehicle[i];
-							            next_y_vals[i] = ptsy_vehicle[i];
+							for(int i = 0; i < ptsx_car.size(); i++) {
+							            next_x_vals[i] = ptsx_car[i];
+							            next_y_vals[i] = ptsy_car[i];
 							}
 
 
