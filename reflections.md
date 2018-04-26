@@ -14,7 +14,7 @@ to represent accelation(+ve values) and breaking (-ve values).
 Kinematic vehicle model is used here. The equations for state update for this model 
 are as follows:
 
-[equations](images/equations.png)
+![equations](images/equations.png)
     
 ## Timestep Length and Elapsed Duration (N & dt)
 
