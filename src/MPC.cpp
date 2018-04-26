@@ -60,7 +60,7 @@ public:
 					2); // Velocity error(40)
 		}
 
-		// Minimising the use of Actuators, i.e. minimizing the change rate of steer angle and acceleration
+		// Minimizing the use of Actuators, i.e. minimizing the change rate of steer angle and acceleration
 		// Add Scaling factor for smoothing the results
 		for (uint8_t t = 0; t < N - 1; t++) {
 			fg[0] += W_DELTA * CppAD::pow(vars[start_delta + t], 2); // Steer angle
@@ -79,7 +79,6 @@ public:
 		//-----Setting up constrains
 		// Initial Constraints
 
-		// as fg[0] is used for cost value
 		fg[1 + start_x] = vars[start_x];
 		fg[1 + start_y] = vars[start_y];
 		fg[1 + start_psi] = vars[start_psi];
@@ -204,7 +203,6 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
 		vars_upperbound[i] = ACC_BOUNDS;
 	}
 
-	// Lower and upper limits for the constraints
 	// Should be 0 besides initial state.
 	Dvector constraints_lowerbound(n_constraints);
 	Dvector constraints_upperbound(n_constraints);
@@ -214,7 +212,7 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
 		constraints_upperbound[i] = 0;
 	}
 
-	// lowerbound
+	// lowerbounds
 	constraints_lowerbound[start_x] = state[0];
 	constraints_lowerbound[start_y] = state[1];
 	constraints_lowerbound[start_psi] = state[2];
@@ -222,7 +220,7 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
 	constraints_lowerbound[start_cte] = state[4];
 	constraints_lowerbound[start_epsi] = state[5];
 
-	// uppwerbound
+	// upperbounds
 	constraints_upperbound[start_x] = state[0];
 	constraints_upperbound[start_y] = state[1];
 	constraints_upperbound[start_psi] = state[2];
